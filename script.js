@@ -20,16 +20,19 @@ SnakeModule.prototype.start = function() {
 var Playground = function(canvas) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
-    this.height = this.canvas.getAttribute('height');
-    this.width = this.canvas.getAttribute('width');
+    this.top = 0;
+    this.left = 0;
+    this.height = parseInt(this.canvas.getAttribute('height'));
+    this.width = parseInt(this.canvas.getAttribute('width'));
     this.context.beginPath();
     this.context.fillStyle = 'white';
-    this.context.fillRect(0, 0, this.width, this.height);
+    this.context.fillRect(this.top, this.left, this.width, this.height);
     this.context.closePath();
 };
 
 Playground.prototype.addSnake = function() {
-    this.snake = new Snake(this.canvas);
+    var playground = this;
+    this.snake = new Snake(this.canvas, function(snake) { return playground.checkSnakeHitBorder(snake); });
     var snake = this.snake;
     document.addEventListener('keydown', function(e) {
         if (e.keyCode === PAUSE_KEY) {
@@ -50,7 +53,18 @@ Playground.prototype.addSnake = function() {
     });
 };
 
-var Snake = function(canvas) {
+Playground.prototype.checkSnakeHitBorder = function(snake) {
+    var playGround = this;
+    var movement = snake.movement;
+    var head = snake.position[snake.position.length - 1];
+    if (head.x + movement > playGround.left + playGround.width ||
+        head.x < playGround.left ||
+        head.y + movement > playGround.top + playGround.height ||
+        head.y < playGround.top) return true;
+    return false;
+};
+
+var Snake = function(canvas, checkHitBorder) {
     this.color = 'green';
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
@@ -58,9 +72,10 @@ var Snake = function(canvas) {
     this.boxHeight = 10;
     this.movement = 10;
     this.position = [{ x: 130, y: 150 }, { x: 140, y: 150 }, { x: 150, y: 150 }];
-    this.intervalTime = 1000;
+    this.intervalTime = 500;
     this.movingInterval = undefined;
     this.isMoving = false;
+    this.isHitBorder = function() { return checkHitBorder(this); };
     this.draw();
 };
 
@@ -122,12 +137,17 @@ Snake.prototype.startMoving = function() {
     var snake = this;
     if (snake.isMoving) return;
     snake.movingInterval = setInterval(function() {
+        if (snake.isHitBorder()) {
+            snake.stopMoving();
+            alert('YOU DIED');
+            return;
+        }
         if (!snake.isMoving) {
             snake.isMoving = true;
         }
         snake.move();
     }, snake.intervalTime);
-}
+};
 
 Snake.prototype.isValidMove = function(direction) {
     if ((direction === LEFT_DIR || direction === RIGHT_DIR) && (this.direction === LEFT_DIR || this.direction === RIGHT_DIR)) return false;
