@@ -32,7 +32,7 @@ var Playground = function(canvas) {
 
 Playground.prototype.addSnake = function() {
     var playground = this;
-    this.snake = new Snake(this.canvas, function(snake) { return playground.checkSnakeHitBorder(snake); });
+    this.snake = new Snake(this);
     var snake = this.snake;
     document.addEventListener('keydown', function(e) {
         if (e.keyCode === PAUSE_KEY) {
@@ -64,10 +64,10 @@ Playground.prototype.checkSnakeHitBorder = function(snake) {
     return false;
 };
 
-var Snake = function(canvas, checkHitBorder) {
+var Snake = function(playGround) {
     this.color = 'green';
-    this.canvas = canvas;
-    this.context = this.canvas.getContext("2d");
+    this.playGround = playGround;
+    this.context = this.playGround.canvas.getContext("2d");
     this.boxWidth = 10;
     this.boxHeight = 10;
     this.movement = 10;
@@ -75,7 +75,7 @@ var Snake = function(canvas, checkHitBorder) {
     this.intervalTime = 500;
     this.movingInterval = undefined;
     this.isMoving = false;
-    this.isHitBorder = function() { return checkHitBorder(this); };
+    this.isHitBorder = function() { return playGround.checkSnakeHitBorder(this); };
     this.draw();
 };
 
