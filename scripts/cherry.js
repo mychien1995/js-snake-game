@@ -23,6 +23,3 @@ Cherry.prototype.erase = function() {
     ctx.clearRect(this.x - 1, this.y - 1, this.boxWidth + 2, this.boxHeight + 2);
     ctx.closePath();
 };
-
-var snakeModule = new SnakeModule('gameCanvas');
-snakeModule.start();
